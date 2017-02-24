@@ -14,7 +14,7 @@ var example = (function () {
     function initScene() {
         renderer.setSize(multiplier * width, multiplier * height);
         renderer.setClearColor(0xffffff, 1);
-        renderer.shadowMapEnabled = true;
+        renderer.shadowMap.enabled = true;
         document.getElementById("webgl-container").appendChild(renderer.domElement);
 
         addCamera();
@@ -25,22 +25,10 @@ var example = (function () {
     }
 
     function addLight() {
-        var spotLight = new THREE.PointLight(0xffffff, 1);
-        spotLight.position.set(0, 20, 0);
-        spotLight.castShadow = true;
-        scene.add(spotLight);
-
-        spotLight = new THREE.PointLight(0xffffff, 1);
-        spotLight.position.set(10, 20, 10);
-        scene.add(spotLight);
-
-        spotLight = new THREE.PointLight(0xffffff, 1);
-        spotLight.position.set(10, -20, 10);
-        scene.add(spotLight);
-        // var directionalLight = new THREE.DirectionalLight(0xd3d3d3, 10);
-        // directionalLight.target.setRotationFromAxisAngle(0, 0, 0);
-        // directionalLight.position.set(20, 20, 10);
-        // scene.add(directionalLight);
+        var directionalLight = new THREE.DirectionalLight(0xffffff, 1, 10);
+        directionalLight.position.set(100, 100, 100);
+        directionalLight.castShadow = true;
+        scene.add(directionalLight);
     }
 
     function addCamera() {
@@ -67,12 +55,19 @@ var example = (function () {
         var loader = new THREE.OBJLoader();
         loader.load('models/auto.obj', function (object) {
             var material = new THREE.MeshPhongMaterial({
-                color: 0xf2f2f2,
+                color: 0x665600,
                 specular: 0xffffff,
                 emissive: 0,
-                shininess: 100,
+                shininess: 200,
                 shading: THREE.SmoothShading
             });
+
+            object.traverse(function (child) {
+                if (child instanceof THREE.Mesh) {
+                    child.material = material;
+                }
+            });
+
             mesh = object;
             mesh.material = material;
 
@@ -81,8 +76,7 @@ var example = (function () {
             matrix.multiply(new THREE.Matrix4().makeRotationX(Math.PI / 2));
             mesh.matrixAutoUpdate = false;
             mesh.matrix = matrix;
-
-            mesh.castShadow = true;
+            
             scene.add(mesh);
             render();
         });
@@ -90,7 +84,7 @@ var example = (function () {
 
     function addGround() {
         var geometry = new THREE.PlaneGeometry(100, 100);
-        var material = new THREE.MeshPhongMaterial({ color: 0x000000 });
+        var material = new THREE.MeshStandardMaterial({ color: 0x444444, side: THREE.DoubleSide });
         var plane = new THREE.Mesh(geometry, material);
         plane.receiveShadow = true;
         scene.add(plane);
