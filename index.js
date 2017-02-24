@@ -15,17 +15,21 @@ var example = (function () {
         renderer.shadowMapEnabled = true;
         document.getElementById("webgl-container").appendChild(renderer.domElement);
 
-        var spotLight = new THREE.SpotLight(0xffffff, 2);
-        spotLight.position.set(2, 12, 10);
+        var spotLight = new THREE.SpotLight(0xffffcc, 1);
+        spotLight.position.set(2, 12, 100);
         spotLight.castShadow = true;
         scene.add(spotLight);
 
-        spotLight = new THREE.SpotLight(0xffffff, 1);
-        spotLight.position.set(-2, 12, 10);
+        spotLight = new THREE.SpotLight(0xffffcc, 1);
+        spotLight.position.set(2, -12, 100);
         scene.add(spotLight);
 
-        spotLight = new THREE.SpotLight(0xffffcc, 2);
-        spotLight.position.set(2000, 1200, 10000);
+        spotLight = new THREE.SpotLight(0xffffcc, 1);
+        spotLight.position.set(-2, -12, 100);
+        scene.add(spotLight);
+
+        spotLight = new THREE.SpotLight(0xffffcc, 1);
+        spotLight.position.set(-2, 12, 100);
         scene.add(spotLight);
 
         camera = new THREE.PerspectiveCamera(35, width / height, 1, 1000);
@@ -68,8 +72,8 @@ var example = (function () {
         var loader = new THREE.STLLoader();
         loader.load('models/house.stl', function (geometry) {
             var material = new THREE.MeshPhongMaterial({
-                color: 0x000000, 
-                specular: 0xffffff, 
+                color: 0x000000,
+                specular: 0xffffff,
                 combine: THREE.MultiplyOperation
             });
             mesh = new THREE.Mesh(geometry, material);
