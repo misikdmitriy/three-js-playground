@@ -15,20 +15,18 @@ var example = (function () {
         renderer.shadowMapEnabled = true;
         document.getElementById("webgl-container").appendChild(renderer.domElement);
 
-        var ambient = new THREE.AmbientLight(0x050505);
-        scene.add(ambient);
+        var spotLight = new THREE.SpotLight(0xffffff, 2);
+        spotLight.position.set(2, 12, 10);
+        spotLight.castShadow = true;
+        scene.add(spotLight);
 
-        var directionalLight = new THREE.DirectionalLight(0xffffff, 2);
-        directionalLight.position.set(2, 1.2, 10).normalize();
-        scene.add(directionalLight);
+        spotLight = new THREE.SpotLight(0xffffff, 1);
+        spotLight.position.set(-2, 12, 10);
+        scene.add(spotLight);
 
-        directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(-2, 1.2, -10).normalize();
-        scene.add(directionalLight);
-
-        var pointLight = new THREE.PointLight(0xffaa00, 2);
-        pointLight.position.set(2000, 1200, 10000);
-        scene.add(pointLight);
+        spotLight = new THREE.SpotLight(0xffffcc, 2);
+        spotLight.position.set(2000, 1200, 10000);
+        scene.add(spotLight);
 
         camera = new THREE.PerspectiveCamera(35, width / height, 1, 1000);
 
@@ -38,7 +36,7 @@ var example = (function () {
         scene.add(camera);
 
         controls = new THREE.TrackballControls(camera);
-        controls.rotateSpeed = 2.0;
+        controls.rotateSpeed = 4.0;
         controls.zoomSpeed = 1.2;
         controls.panSpeed = 0.8;
         controls.noZoom = false;
@@ -70,7 +68,9 @@ var example = (function () {
         var loader = new THREE.STLLoader();
         loader.load('models/house.stl', function (geometry) {
             var material = new THREE.MeshPhongMaterial({
-                color: 0xffffff, specular: 0xffffff, combine: THREE.MultiplyOperation
+                color: 0x000000, 
+                specular: 0xffffff, 
+                combine: THREE.MultiplyOperation
             });
             mesh = new THREE.Mesh(geometry, material);
             mesh.castShadow = true;
