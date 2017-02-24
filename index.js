@@ -9,36 +9,50 @@ var example = (function () {
     var controls;
     var width = window.innerWidth;
     var height = window.innerHeight;
+    var multiplier = 4 / 5;
 
     function initScene() {
-        renderer.setSize(4 / 5 * width, 4 / 5 * height);
+        renderer.setSize(multiplier * width, multiplier * height);
+        renderer.setClearColor(0xffffff, 1);
         renderer.shadowMapEnabled = true;
         document.getElementById("webgl-container").appendChild(renderer.domElement);
 
-        var spotLight = new THREE.SpotLight(0xffffcc, 1);
-        spotLight.position.set(2, 12, 100);
+        addCamera();
+        addLight();
+        addTrackballControls();
+        addObject();
+        addGround();
+    }
+
+    function addLight() {
+        var spotLight = new THREE.PointLight(0xffffff, 1);
+        spotLight.position.set(0, 20, 0);
         spotLight.castShadow = true;
         scene.add(spotLight);
 
-        spotLight = new THREE.SpotLight(0xffffcc, 1);
-        spotLight.position.set(2, -12, 100);
+        spotLight = new THREE.PointLight(0xffffff, 1);
+        spotLight.position.set(10, 20, 10);
         scene.add(spotLight);
 
-        spotLight = new THREE.SpotLight(0xffffcc, 1);
-        spotLight.position.set(-2, -12, 100);
+        spotLight = new THREE.PointLight(0xffffff, 1);
+        spotLight.position.set(10, -20, 10);
         scene.add(spotLight);
+        // var directionalLight = new THREE.DirectionalLight(0xd3d3d3, 10);
+        // directionalLight.target.setRotationFromAxisAngle(0, 0, 0);
+        // directionalLight.position.set(20, 20, 10);
+        // scene.add(directionalLight);
+    }
 
-        spotLight = new THREE.SpotLight(0xffffcc, 1);
-        spotLight.position.set(-2, 12, 100);
-        scene.add(spotLight);
-
+    function addCamera() {
         camera = new THREE.PerspectiveCamera(35, width / height, 1, 1000);
 
         camera.position.set(0, -50, 50);
         camera.lookAt(new THREE.Vector3(0, 0, 0));
         camera.up.set(0, 0, 1);
         scene.add(camera);
+    }
 
+    function addTrackballControls() {
         controls = new THREE.TrackballControls(camera);
         controls.rotateSpeed = 4.0;
         controls.zoomSpeed = 1.2;
@@ -47,47 +61,40 @@ var example = (function () {
         controls.noPan = false;
         controls.staticMoving = true;
         controls.dynamicDampingFactor = 0.3;
+    }
 
-        // var geometry = new THREE.Geometry();
-        // geometry.vertices.push(new THREE.Vector3(0.0, 1.0, 0.0));
-        // geometry.vertices.push(new THREE.Vector3(-1.0, -1.0, 0.0));
-        // geometry.vertices.push(new THREE.Vector3(1.0, -1.0, 0.0));
-
-        // geometry.faces.push(new THREE.Face3(0, 1, 2));
-
-        // geometry.faces[0].vertexColors[0] = new THREE.Color(0xFF0000);
-        // geometry.faces[0].vertexColors[1] = new THREE.Color(0x00FF00);
-        // geometry.faces[0].vertexColors[2] = new THREE.Color(0x0000FF);
-
-        // var material = new THREE.MeshBasicMaterial({
-        //     vertexColors: THREE.VertexColors,
-        //     side: THREE.DoubleSide
-        // });
-
-        // mesh = new THREE.Mesh(geometry, material);
-
-        // mesh.name = "mesh";
-        // scene.add(mesh);
-
-        var loader = new THREE.STLLoader();
-        loader.load('models/house.stl', function (geometry) {
+    function addObject() {
+        var loader = new THREE.OBJLoader();
+        loader.load('models/auto.obj', function (object) {
             var material = new THREE.MeshPhongMaterial({
-                color: 0x000000,
+                color: 0xf2f2f2,
                 specular: 0xffffff,
-                combine: THREE.MultiplyOperation
+                emissive: 0,
+                shininess: 100,
+                shading: THREE.SmoothShading
             });
-            mesh = new THREE.Mesh(geometry, material);
+            mesh = object;
+            mesh.material = material;
+
+            var matrix = mesh.matrix.clone();
+            matrix.makeScale(5, 5, 5);
+            matrix.multiply(new THREE.Matrix4().makeRotationX(Math.PI / 2));
+            mesh.matrixAutoUpdate = false;
+            mesh.matrix = matrix;
+
             mesh.castShadow = true;
             scene.add(mesh);
             render();
         });
+    }
 
+    function addGround() {
         var geometry = new THREE.PlaneGeometry(100, 100);
         var material = new THREE.MeshPhongMaterial({ color: 0x000000 });
         var plane = new THREE.Mesh(geometry, material);
         plane.receiveShadow = true;
         scene.add(plane);
-    };
+    }
 
     var stats = new Stats();
     stats.setMode(0);
@@ -101,15 +108,17 @@ var example = (function () {
         controls.update();
         renderer.render(scene, camera);
         requestAnimationFrame(render);
-        mesh.rotation.z += 0.01;
+
+        var matrix = mesh.matrix.clone();
+        matrix.multiply(new THREE.Matrix4().makeRotationY(0.01));
+        mesh.matrix = matrix;
 
         stats.update();
-    };
+    }
 
     function onDocumentMouseDown(event) {
         var projector = new THREE.Projector();
 
-        var projector = new THREE.Projector();
         var mouseClickVector = new THREE.Vector3(
             event.clientX / width * 2 - 1,
             -event.clientY / height * 2 + 1,
@@ -146,8 +155,18 @@ var example = (function () {
         }
     }
 
+    function onResize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        camera.aspect = multiplier * width / height;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(multiplier * width, multiplier * height);
+    }
+
     window.onload = initScene;
     window.onkeydown = checkKey;
+    window.onresize = onResize;
     // document.onmousedown = onDocumentMouseDown;
 
     return {
